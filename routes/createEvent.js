@@ -17,7 +17,7 @@ router.post('/addEvent', function(req, res) {
   var name = req.body.name
   var element = req.body.element
   var user = req.body.user
-  db.query("insert into event(user,eventName,element) values ('"+ user +"','"+ name +"','"+ element +"')", function(err,result){
+  db.query("insert into _event(user,eventName,element) values ('"+ user +"','"+ name +"','"+ element +"')", function(err,result){
     if(err) {
       console.log(err)
       res.send(err)

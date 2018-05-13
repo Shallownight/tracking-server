@@ -13,12 +13,13 @@ router.all('*', function(req, res, next) {
 
 router.post('/click', function(req, res) {
 	console.log(req.body)
-	var user = req.body.user
+	var user = 'user' + req.body.user + '_event'
 	var eventName = req.body.eventName
 	var day = req.body.day
 
 	db.query(`select * from ${user} where eventName = "${eventName}" AND day = "${day}"`,function(err,result){
 		if(err){
+			res.send(err)
 			console.log(err)
 		}
 		else{
@@ -26,10 +27,12 @@ router.post('/click', function(req, res) {
 			if(result.length == 0){
 				db.query(`insert into ${user}(eventName,day,click) values ("${eventName}","${day}",0)`, function(err,result){
 					if(err){
+						res.send(err)
 						console.log(err)
 					}
 					else{
-						console.log("create new table")
+						res.send("OK")
+						console.log("create new data")
 					}
 				})
 			}
@@ -37,9 +40,11 @@ router.post('/click', function(req, res) {
 			else {
 				db.query(`update ${user} set click = click + 1 where eventName = "${eventName}" AND day = "${day}"`, function(err,result){
 					if(err){
+						res.send(err)
 						console.log(err)
 					}
 					else{
+						res.send("OK")
 						console.log("update click")
 					}
 				})
@@ -52,8 +57,9 @@ router.post('/click', function(req, res) {
 //事件名称接口
 router.post('/getEvent', function(req, res) {
 	var user = req.body.user
-	db.query(`select eventName from event where user = "${user}"`,function(err,result){
+	db.query(`select eventName from _event where user = "${user}"`,function(err,result){
 		if(err){
+			res.send(err)
 			console.log(err)
 		}
 		else{
@@ -73,7 +79,7 @@ function GetDateStr(AddDayCount) {
   }
 
 router.post('/getEventData',function(req, res){
-	var user = req.body.user
+	var user = req.body.user + '_event'
 	var eventName = req.body.eventName
 	console.log(eventName)
 	var data = {
