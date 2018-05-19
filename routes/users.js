@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var fs= require('fs');  
+var parser = require('ua-parser-js');
 
 var db = require("../config/db");
 
@@ -145,7 +146,8 @@ router.post("/checkUser",function(req,res,next){
     var re = {}
     db.query(`Select * from _user where userName = "${user}"`,function(err,result){
 		if(err){
-			console.log(err)
+            console.log(err)
+            res.end(err)
 		}
 		else{
 			if(result.length == 0){
@@ -161,10 +163,12 @@ router.post("/checkUser",function(req,res,next){
 })
 
 //获取访问者信息
-router.get("/getUserMessage",function(req,res,next){
+router.post("/getUserMessage",function(req,res,next){
+    var userVisit = req.body.user + '_visit'
     var ip = req.headers['x-real-ip'] ? req.headers['x-real-ip'] : req.ip.replace(/::ffff:/, '');
     var date = getNowFormatDate();
     var time = getNowTime();
+    var ua = parser(req.headers['user-agent']);
     // db.query("select * from user",function(err,result){
     //     if(err){
     //         console.log(err.message)
@@ -172,13 +176,54 @@ router.get("/getUserMessage",function(req,res,next){
     //         res.send(result)
     //     }
     // });
-    var req = {
+    var message = {
       "ip": ip,
       "date": date,
       "time": time
     };
-    console.log(req)
-    res.send("ok")
+    
+    //Browser Engine OS Device
+    db.query(`Select * from ${userVisit} where ip = "${message.ip}"`,function(err,result){
+        if(err){
+            console.log(err)
+            res.end(err)
+        }
+        // 初次浏览时
+        else if(result.length == 0){
+            db.query(`insert into ${userVisit}(ip,firstDate,lastDate,time,userVisit,pageVisit) values ("${message.ip}","${message.date}","${message.date}","${message.time}",1,1)`,function(err,result){
+               if(err){res.end(err)}
+               else{res.send("ok")}
+            })
+        }
+        else if(result.length !== 0){
+            //判断上次浏览日期，如果是今天则PV+1，如果不是则UV和PV都+1
+            db.query(`Select lastDate from ${userVisit} where ip = "${message.ip}"`,function(err,result){
+                if(err){res.end(err)}
+                else{
+                    if(result[0].lastDate == message.date){
+                        db.query(`UPDATE ${userVisit} SET pageVisit = pageVisit + 1,time = "${message.time}" where ip= "${message.ip}" `,function(err,result){
+                            if(err){console.log(err);res.end(err)}
+                            else{res.send("OK")}
+                        })
+                    }
+                    else{
+                        // PV + 1
+                        db.query(`update ${userVisit} set pageVisit=pageVisit + 1,userVisit=userVisit + 1,lastDate="${message.date}",time = "${message.time}" where ip="${message.ip}" `,function(err,result){
+                            if(err){res.end(err)}
+                            else{
+                                // 更新日期
+                                // db.query(`update ${userVisit} set lastDate="${message.date}",time = "${message.time}" where ip="${message.ip}" `,function(err,result){
+                                //     res.send("ok")
+                                // })
+                                res.send("OK")
+                            }
+                        })
+                    }
+                }
+            })
+        }
+    })
+
   });
 
 module.exports = router;
