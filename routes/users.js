@@ -52,6 +52,7 @@ router.post("/createUser",function(req,res,next){
     var user = req.body.webName
     var eventTable = user + '_event'
     var visitTable = user + '_visit'
+    var plantformTable = user + '_plantform'
     var time = getNowFormatDate()
     var operator = req.body.operator
     var re = {}
@@ -90,6 +91,15 @@ router.post("/createUser",function(req,res,next){
                                 res.send(re)
                             }
                             else{
+                                db.query(`CREATE TABLE ${plantformTable}(
+                                    type varchar(20),
+                                    name varchar(20),
+                                    visit varchar(10)
+                                )`, function(err,result){
+                                    if(err){
+                                        console.log(err)
+                                    }
+                                })
                                 //向_user总表插入新站点数据
                                 db.query(`insert into _user(userName,operator,time) values ("${user}","${operator}","${time}")`, function(err,result){
                                     if(err){
@@ -109,7 +119,14 @@ router.post("/createUser",function(req,res,next){
                 var data = ""
                 data = `
 function sendMessage() {
-    fetch('http://127.0.0.1:3000/users/getUserMessage',{method: "GET"})
+    fetch('http://127.0.0.1:3000/users/getUserMessage',{
+        method: "POST",
+        body: JSON.stringify({"user":"${user}"}),
+        headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json'
+            },
+        })
         .then()
         .catch(function(res){ console.log(res) })
     }
@@ -181,8 +198,11 @@ router.post("/getUserMessage",function(req,res,next){
       "date": date,
       "time": time
     };
-    
+
     //Browser Engine OS Device
+    //获取平台信息
+    platformMessage(req.body.user,ua)
+    
     db.query(`Select * from ${userVisit} where ip = "${message.ip}"`,function(err,result){
         if(err){
             console.log(err)
@@ -225,5 +245,86 @@ router.post("/getUserMessage",function(req,res,next){
     })
 
   });
+
+  function platformMessage(user,ua) {
+    var table = user + '_plantform'
+    var browser = ua.browser.name
+    var os = ua.os.name + ua.os.version
+    if(browser !== ""){
+        
+        db.query(`select * from ${table} where type = "browser" and name = "${browser}"`,function(err,result){
+            if(err){
+                console.log("1111")
+                console.log(err)
+            }
+            else{
+                console.log(result.length)
+                if(result.length == 0){
+                    db.query(`insert into ${table}(type,name,visit) values ("browser","${browser}",1)`,function(err,result){
+                        if(err){ console.log(err)}
+                        else {
+                            console.log("suceess")
+                        }
+                    })
+                }
+                else {
+                    db.query(`update ${table} set visit = visit + 1 where type = "browser" and name = "${browser}"`,function(err,result){
+                        if(err){  console.log(err)  }
+                        else {
+                            console.log("suceess")
+                        }
+                    })
+                }
+            }
+        })
+        
+    }
+    if(os !== ""){
+        db.query(`select * from ${table} where type = "os" and name = "${os}"`,function(err,result){
+            if(err){
+                console.log(err)
+            }
+            else{
+                if(result.length == 0){
+                    db.query(`insert into ${table}(type,name,visit) values ("os","${os}",1)`,function(err,result){
+                        if(err){ console.log(err)}
+                    })
+                }
+                else{
+                    db.query(`update ${table} set visit = visit + 1 where type = "os" and name = "${os}"`,function(err,result){
+                        if(err){  console.log(err)  }
+                    })
+                }
+            }
+        })
+        
+    }
+  }
+
+  router.post("/getIP",function(req,res,next){
+      var userVisit = req.body.user + "_visit"
+      db.query(`Select * from ${userVisit}`,function(err,result){
+        if(err){
+            console.log(err)
+            res.end(err)
+        }
+        else{
+            res.send(result)
+        }
+      })
+  })
+
+  router.post("/getPlantform",function(req,res,next){
+    var table = req.body.user + "_plantform"
+    db.query(`Select * from ${table}`,function(err,result){
+      if(err){
+          console.log(err)
+          res.end(err)
+      }
+      else{
+          res.send(result)
+      }
+    })
+})
 
 module.exports = router;
