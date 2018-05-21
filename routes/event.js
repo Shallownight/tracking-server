@@ -12,7 +12,6 @@ router.all('*', function(req, res, next) {
 });
 
 router.post('/click', function(req, res) {
-	console.log(req.body)
 	var user = 'user' + req.body.user + '_event'
 	var eventName = req.body.eventName
 	var day = req.body.day
@@ -32,7 +31,6 @@ router.post('/click', function(req, res) {
 					}
 					else{
 						res.send("OK")
-						console.log("create new data")
 					}
 				})
 			}
@@ -45,7 +43,6 @@ router.post('/click', function(req, res) {
 					}
 					else{
 						res.send("OK")
-						console.log("update click")
 					}
 				})
 			}
@@ -76,12 +73,11 @@ function GetDateStr(AddDayCount) {
 	var m = dd.getMonth()+1;//获取当前月份的日期 
 	var d = dd.getDate(); 
 	return y+"-"+m+"-"+d; 
-  }
+}
 
 router.post('/getEventData',function(req, res){
 	var user = req.body.user + '_event'
 	var eventName = req.body.eventName
-	console.log(eventName)
 	var data = {
 		one: 0,
 		tow: 0,

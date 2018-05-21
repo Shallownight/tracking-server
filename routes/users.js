@@ -254,7 +254,6 @@ router.post("/getUserMessage",function(req,res,next){
         
         db.query(`select * from ${table} where type = "browser" and name = "${browser}"`,function(err,result){
             if(err){
-                console.log("1111")
                 console.log(err)
             }
             else{
@@ -262,17 +261,11 @@ router.post("/getUserMessage",function(req,res,next){
                 if(result.length == 0){
                     db.query(`insert into ${table}(type,name,visit) values ("browser","${browser}",1)`,function(err,result){
                         if(err){ console.log(err)}
-                        else {
-                            console.log("suceess")
-                        }
                     })
                 }
                 else {
                     db.query(`update ${table} set visit = visit + 1 where type = "browser" and name = "${browser}"`,function(err,result){
                         if(err){  console.log(err)  }
-                        else {
-                            console.log("suceess")
-                        }
                     })
                 }
             }
@@ -320,11 +313,111 @@ router.post("/getUserMessage",function(req,res,next){
       if(err){
           console.log(err)
           res.end(err)
-      }
+        }
       else{
           res.send(result)
       }
     })
-})
+  })
+
+  function GetDateStr(AddDayCount) { 
+    var dd = new Date(); 
+    dd.setDate(dd.getDate()+AddDayCount);//获取AddDayCount天后的日期 
+    var y = dd.getFullYear(); 
+    var m = dd.getMonth()+1;//获取当前月份的日期 
+    var d = dd.getDate(); 
+    return y+"-"+m+"-"+d; 
+  }
+
+  router.post("/getNewUser",function(req,res,next){
+    var table = req.body.user + "_visit"
+    var date = {
+      one: GetDateStr(0),
+      tow: GetDateStr(-1),
+      three: GetDateStr(-2),
+      four: GetDateStr(-3),
+      five: GetDateStr(-4),
+      six: GetDateStr(-5),
+      seven: GetDateStr(-6)
+    }
+    var tableData = []
+    // 第一天
+    db.query(`select * from ${table} where firstDate = "${date.one}"`,function(err,result){
+      if(err) {
+        console.log(err)
+        res.end(err)
+      }
+      else {
+        //第二天
+        tableData.push(result)
+        db.query(`select * from ${table} where firstDate = "${date.tow}"`,function(err,result){
+          if(err){
+            console.log(err)
+            res.end(err)
+          }
+          else {
+            //第三天
+            tableData.push(result)
+            db.query(`select * from ${table} where firstDate = "${date.three}"`,function(err,result){
+              if(err){
+                console.log(err)
+                res.end(err)
+              }
+              else {
+                //第四天
+                tableData.push(result)
+                db.query(`select * from ${table} where firstDate = "${date.four}"`,function(err,result){
+                  if(err){
+                    console.log(err)
+                    res.end(err)
+                  }
+                  else {
+                    //第五天
+                    tableData.push(result)
+                    db.query(`select * from ${table} where firstDate = "${date.five}"`,function(err,result){
+                      if(err){
+                        console.log(err)
+                        res.end(err)
+                      }
+                      else {
+                        //第六天
+                        tableData.push(result)
+                        db.query(`select * from ${table} where firstDate = "${date.six}"`,function(err,result){
+                          if(err){
+                            console.log(err)
+                            res.end(err)
+                          }
+                          else {
+                            //第七天
+                            tableData.push(result)
+                            db.query(`select * from ${table} where firstDate = "${date.seven}"`,function(err,result){
+                              if(err){
+                                console.log(err)
+                                res.end(err)
+                              }
+                              else {
+                                tableData.push(result)
+                                res.send(tableData)
+                              }
+                            })
+                            
+                          }
+                        })
+                        
+                      }
+                    })
+                    
+                  }
+                })
+                
+              }
+            })
+
+          }
+        })
+      }
+    })
+
+  })
 
 module.exports = router;

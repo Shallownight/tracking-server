@@ -13,7 +13,6 @@ router.all('*', function(req, res, next) {
 });
 
 router.post('/addEvent', function(req, res) {
-  console.log(req.body)
   var name = req.body.name
   var element = req.body.element
   var user = req.body.user
@@ -56,8 +55,6 @@ document.getElementsByTagName("body")[0]${eleStr}.addEventListener("click",funct
             return console.error(err);
         }
       });
-
-      console.log("is ok")
     }
   })
   res.send('respond with a resource');
