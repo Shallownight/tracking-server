@@ -108,7 +108,9 @@ router.post("/createUser",function(req,res,next){
                                         res.send(re)
                                     }
                                     else{
+                                        re.status = 1
                                         console.log("数据库操作成功")
+                                        res.send(re)
                                     }
                                 })
                             }
@@ -147,9 +149,7 @@ function getNowFormatDate() {
                     if(err) {
                         return console.log(err);
                     }
-                    console.log("创建成功！");     
-                    re.status = 1
-                    res.send(re)
+                    console.log("埋点Js文件创建成功！");     
                 });
                 /******************************************* */
             }
@@ -177,6 +177,54 @@ router.post("/checkUser",function(req,res,next){
             }
         }
     })
+})
+
+router.post("/deleteUser",function(req,res,next){
+    var user = req.body.user
+    var eventTable = req.body.user + "_event"
+    var plantformTable = req.body.user + "_plantform"
+    var visitTable = req.body.user + "_visit"
+    db.query(`drop table if exists ${eventTable}`,function(err,result){
+        if(err){
+            console.log(err)
+            res.end(err)
+        }
+    })
+    db.query(`drop table if exists ${plantformTable}`,function(err,result){
+        if(err){
+            console.log(err)
+            res.end(err)
+        }
+    })
+    db.query(`drop table if exists ${visitTable}`,function(err,result){
+        if(err){
+            console.log(err)
+            res.end(err)
+        }
+    })
+    fs.unlink('./public/js/' + user + '.js',function(err){
+        if(err) {
+            console.log(err)
+        }
+    })
+    db.query(`delete from _user where userName = "${user}"`,function(err,result){
+        if(err){
+            console.log(err)
+            res.end(err)
+        }
+        else{
+            db.query(`delete from _event where user = "${user}"`,function(err,result){
+                if(err){
+                    console.log(err)
+                    res.end(err)
+                }
+                else{
+                    res.send("OK")
+                }
+            })
+        }
+    })
+    
 })
 
 //获取访问者信息
