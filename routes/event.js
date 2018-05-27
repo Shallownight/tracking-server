@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-
+var fs = require('fs')
 var db = require("../config/db");
 
 router.all('*', function(req, res, next) {
@@ -201,6 +201,35 @@ router.post('/getEventData',function(req, res){
 			//第二天结束
 		}
 	})
+})
+
+//删除埋点事件
+router.post('/deleteEvent',function(req, res){
+	var eventName = req.body.eventName
+	var user = req.body.user
+
+	db.query(`delete from _event where user = "${user}" and eventName = "${eventName}"`,function(err,result){
+		if(err){
+			console.log(err)
+		}
+		else{
+			res.send("OK")
+		}
+	})
+
+	fs.readFile( './public/js/' + user + '.js' , 'utf8', function (err,data) {
+	if (err) {
+		console.log(err)
+	}
+	var re = eval("/\\/\\/" + eventName + "-start[\\s\\S]*" + eventName + "-end/g")
+	var result = data.replace(re, '')
+
+	fs.writeFile('./public/js/' + user + '.js' , result, 'utf8', function (err) {
+		if (err) {
+			console.log(err)
+		}
+	});
+	});
 })
 
 module.exports = router;

@@ -33,7 +33,7 @@ router.post('/addEvent', function(req, res) {
       var data = ''
       //写入用户命名JS埋点文件中，用于实现埋点
       data = `
-
+//${name}-start
 document.getElementsByTagName("body")[0]${eleStr}.addEventListener("click",function(){
   var day = getNowFormatDate()
   var opts = {
@@ -48,7 +48,8 @@ document.getElementsByTagName("body")[0]${eleStr}.addEventListener("click",funct
     .then()
     .catch(function(res){ console.log(res) })
 
-})\n`
+})
+//${name}-end\n`
 
       fs.writeFile( './public/js/' + user + '.js' , data, {flag:'a',encoding:'utf-8'}, function(err) {
         if (err) {
@@ -57,7 +58,7 @@ document.getElementsByTagName("body")[0]${eleStr}.addEventListener("click",funct
       });
     }
   })
-  res.send('respond with a resource');
+  res.send('200');
 });
 
 

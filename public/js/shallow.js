@@ -2,7 +2,7 @@
 function sendMessage() {
     fetch('http://127.0.0.1:3000/users/getUserMessage',{
         method: "POST",
-        body: JSON.stringify({"user":"test"}),
+        body: JSON.stringify({"user":"shallow"}),
         headers: {
                 'Accept': 'application/json, text/plain, */*',
                 'Content-Type': 'application/json'
@@ -23,3 +23,14 @@ function getNowFormatDate() {
     return currentdate;
 }
                 
+
+
+
+
+
+
+
+
+
+
+
