@@ -12,7 +12,7 @@ router.all('*', function(req, res, next) {
 });
 
 router.post('/click', function(req, res) {
-	var user = 'user' + req.body.user + '_event'
+	var user = req.body.user + '_event'
 	var eventName = req.body.eventName
 	var day = req.body.day
 
@@ -24,7 +24,7 @@ router.post('/click', function(req, res) {
 		else{
 			//如果为空时，插入语句
 			if(result.length == 0){
-				db.query(`insert into ${user}(eventName,day,click) values ("${eventName}","${day}",0)`, function(err,result){
+				db.query(`insert into ${user}(eventName,day,click) values ("${eventName}","${day}",1)`, function(err,result){
 					if(err){
 						res.send(err)
 						console.log(err)

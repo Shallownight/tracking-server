@@ -120,8 +120,10 @@ router.post("/createUser",function(req,res,next){
                 //提交浏览者信息，获取今日日期
                 var data = ""
                 data = `
+var trackEventIp = "127.0.0.1:3000"
+var sendMessageIp = "http://" + trackEventIp + "/users/getUserMessage"
 function sendMessage() {
-    fetch('http://127.0.0.1:3000/users/getUserMessage',{
+    fetch(sendMessageIp,{
         method: "POST",
         body: JSON.stringify({"user":"${user}"}),
         headers: {
@@ -142,6 +144,41 @@ function getNowFormatDate() {
     var strDate = date.getDate();
     var currentdate = year + seperator1 + month + seperator1 + strDate;
     return currentdate;
+}
+
+function showExist(element){
+	var width = element.offsetWidth
+	var height = element.offsetHeight
+	var left = getExistLeft(element)
+	var top = getExistTop(element)
+	createExistCover(width,height,left,top)
+
+}
+function getExistLeft(element){
+	var left = element.offsetLeft
+	if(element.offsetParent != null){
+			left += getExistLeft(element.offsetParent)
+	}
+	return left
+}
+function getExistTop(element){
+	var top = element.offsetTop
+	if(element.offsetParent != null){
+			top += getExistLeft(element.offsetParent)
+	}
+	return top
+}
+function createExistCover(width,height,left,top){
+	var div = document.createElement("div")
+	div.setAttribute('class','shallow-track-exist')
+	div.style.position = 'absolute'
+	div.style.width = width + 'px'
+	div.style.height = height + 'px'
+	div.style.left = left + 'px'
+	div.style.top = top + 'px'
+	div.style.backgroundColor = 'rgba(250,128,10,0.4)'
+
+	window.document.body.appendChild(div)
 }
                 `
                 //创建埋点js

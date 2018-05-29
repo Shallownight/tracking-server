@@ -34,6 +34,9 @@ router.post('/addEvent', function(req, res) {
       //写入用户命名JS埋点文件中，用于实现埋点
       data = `
 //${name}-start
+if(typeof(eventTrakingOpen) !== "undefined"){
+	showExist(document.getElementsByTagName("body")[0]${eleStr})
+}
 document.getElementsByTagName("body")[0]${eleStr}.addEventListener("click",function(){
   var day = getNowFormatDate()
   var opts = {
@@ -44,7 +47,8 @@ document.getElementsByTagName("body")[0]${eleStr}.addEventListener("click",funct
         'Content-Type': 'application/json'
     },
   }
-  fetch('http://127.0.0.1:3000/event/click',opts)
+  var eventIp = "http://" + trackEventIp + "/event/click"
+  fetch(eventIp,opts)
     .then()
     .catch(function(res){ console.log(res) })
 
