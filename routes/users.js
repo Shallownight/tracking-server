@@ -27,6 +27,9 @@ function getNowTime() {
     var date = new Date();
     var hour = date.getHours();
     var minute = date.getMinutes();
+    if(minute < 10) {
+        minute = "0" + minute
+    }
     var time = hour + ':' + minute;
     return time;
 }
